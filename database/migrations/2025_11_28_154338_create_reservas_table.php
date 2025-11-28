@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('mesa_id')->constrained();
             $table->foreignId('user_id')->constrained();
+            $table->string('telefono');
             $table->date('fecha');
             $table->enum('hora', ['13:00', '15:00', '20:00', '22:00']);
             $table->tinyInteger('numpersonas');
