@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\ReservaController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
-    return view('welcome');
+    $url = Storage::disk('s3')->url('reservas.jpg');
+    return view('welcome', compact('url'));
 });
 
 
@@ -21,6 +23,8 @@ Route::middleware(['auth'])->group(function () {
     //Mostrar formulario para crear una nueva reserva
     Route::get('/nueva-reserva', [ReservaController::class, 'new'])->name('nueva_reserva');
 
+    //Buscar disponibilidad para una nueva reserva
+    Route::post('/buscar-disponibilidad', [ReservaController::class, 'buscarDisponibilidad'])->name('reservas.buscar');
 
 
 });
