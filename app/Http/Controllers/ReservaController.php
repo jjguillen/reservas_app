@@ -48,14 +48,14 @@ class ReservaController extends Controller
         $hora = $request->input('hora');
         $num_personas = $request->input('personas');
 
-        //Lógica para buscar disponibilidad (a implementar)
+        //Lógica para buscar disponibilidad de mesas
         // Obtener todas las mesas
         $mesas = Mesa::all();
 
         // Filtrar mesas ocupadas en esa fecha y hora
         $ocupadas = Reserva::where('fecha', $fecha)
             ->where('hora', $hora)
-            ->pluck('mesa_id')
+            ->pluck('mesa_id')  // Obtener solo los IDs de las mesas ocupadas
             ->toArray();
 
         // Mesas libres
