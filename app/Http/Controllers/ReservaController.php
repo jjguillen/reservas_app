@@ -83,4 +83,17 @@ class ReservaController extends Controller
         return view('reservas.search', compact('libres', 'telefono','fecha', 'hora', 'num_personas'));
     }
 
+    public function cancelar($reserva) {
+        $reserva = Reserva::findOrFail($reserva);
+        //Verificar que la reserva pertenece al usuario logueado
+        if ($reserva->user_id != auth()->id()) {
+            abort(403);
+        }
+
+        $reserva->estado = 'cancelada';
+        $reserva->save();
+
+        return redirect()->route('mis_reservas');
+    }
+
 }

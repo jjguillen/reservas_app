@@ -21,12 +21,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mis-reservas', [ReservaController::class, 'index'])->name('mis_reservas');
 
     //Mostrar formulario para crear una nueva reserva
-    Route::get('/nueva-reserva', [ReservaController::class, 'new'])->name('nueva_reserva');
+    Route::get('/nueva-reserva', [ReservaController::class, 'new'])->name('reservas.nueva');
 
     //Buscar disponibilidad para una nueva reserva
     Route::post('/buscar-disponibilidad', [ReservaController::class, 'buscarDisponibilidad'])->name('reservas.buscar');
 
     //Almacenar una nueva reserva
     Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
+
+    //Cancelar una reserva
+    Route::get('/reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar'])->name('reservas.cancelar');
 
 });
