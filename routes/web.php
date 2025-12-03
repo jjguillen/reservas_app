@@ -26,5 +26,7 @@ Route::middleware(['auth'])->group(function () {
     //Buscar disponibilidad para una nueva reserva
     Route::post('/buscar-disponibilidad', [ReservaController::class, 'buscarDisponibilidad'])->name('reservas.buscar');
 
+    //Almacenar una nueva reserva
+    Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
 
 });

@@ -38,6 +38,9 @@
                 <!-- Número de personas -->
                 <x-input label="Número de personas" type="number" name="personas" placeholder="2" required />
 
+                <!-- Teléfono de contacto -->
+                <x-input label="Teléfono de contacto" type="tel" name="telefono" placeholder="986325444" required />
+
                 <!-- Botón -->
                 <button type="submit" class="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition">
                     Buscar

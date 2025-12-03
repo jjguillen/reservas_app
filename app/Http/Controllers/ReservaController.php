@@ -32,8 +32,22 @@ class ReservaController extends Controller
     /**
      * Almacenar una nueva reserva
      */
-    public function store() {
-        echo "Crear reserva";
+    public function store(Request $request) {
+        $mesa_id = $request->input('mesa_id');
+        $fecha = $request->input('fecha');
+        $hora = $request->input('hora');
+        $num_personas = $request->input('num_personas');
+        $telefono = $request->input('telefono');
+
+        Reserva::create([ 'mesa_id' => $mesa_id,
+            'fecha' => $fecha,
+            'hora' => $hora,
+            'user_id' => auth()->id(),
+            'numpersonas' => $num_personas,
+            'telefono' => $telefono,
+            'estado' => 'pendiente']);
+
+        return redirect()->route('mis_reservas');
     }
 
     public function buscarDisponibilidad(Request $request)  {
@@ -42,29 +56,30 @@ class ReservaController extends Controller
             'fecha' => 'required|date|after_or_equal:today',
             'hora' => 'required',
             'personas' => 'required|integer|min:1',
+            'telefono' => 'required|string|min:9'
         ]);
 
         $fecha = $request->input('fecha');
         $hora = $request->input('hora');
         $num_personas = $request->input('personas');
+        $telefono = $request->input('telefono');
 
         //Lógica para buscar disponibilidad de mesas
         // Obtener todas las mesas
-        $mesas = Mesa::all();
+        // capacidad - numpersona <= 2 --> dos huecos se pueden dejar en la mesa
+        $mesas = Mesa::where('capacidad', '>=', $num_personas)
+                        ->where('capacidad', '<=', (2 + $num_personas) )->get(); //SQL
 
-        // Filtrar mesas ocupadas en esa fecha y hora
+        // Filtrar mesas ocupadas en esa fecha y hora (SQL)
         $ocupadas = Reserva::where('fecha', $fecha)
             ->where('hora', $hora)
             ->pluck('mesa_id')  // Obtener solo los IDs de las mesas ocupadas
             ->toArray();
 
         // Mesas libres
-        $libres = $mesas->whereNotIn('id', $ocupadas);
+        $libres = $mesas->whereNotIn('id', $ocupadas); // No SQL, se trabaja en memoria
 
-        echo "Buscando ...<br>";
-        foreach ($libres as $libre) {
-            echo $libre . "<br>";
-        }
+        return view('reservas.search', compact('libres', 'telefono','fecha', 'hora', 'num_personas'));
     }
 
 }
