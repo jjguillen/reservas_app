@@ -31,7 +31,7 @@
                         <option value="13:00">13:00</option>
                         <option value="15:00">15:00</option>
                         <option value="20:00">20:00</option>
-                        <option value="21:00">22:00</option>
+                        <option value="22:00">22:00</option>
                     </select>
                 </div>
 
