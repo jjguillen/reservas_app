@@ -16,7 +16,8 @@ class ReservaController extends Controller
     public function index()  {
         //Mostrar todas las reservas del usuario logueado
         $user = auth()->user();
-        $reservas = $user->reservas;
+        //Reservas futuras, las que ya han pasado no se muestran
+        $reservas = $user->reservas->where('fecha', '>=', now()->toDateString());
 
         return view('reservas.index', compact('reservas', 'user'));
     }
