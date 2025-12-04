@@ -6,7 +6,11 @@
             <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">Reserva tu mesa ahora</p>
             <ul class="flex gap-3 text-sm leading-normal me-4">
                 <li>
-                    <x-button_w link="{{route('reservas.nueva')}}" texto="Haz una reserva ahora"/>
+                    @if (auth()->user()->admin)
+                        <x-button_w link="{{route('reservas.pendientes')}}" texto="Ver todas las reservas pendientes"/>
+                    @else
+                        <x-button_w link="{{route('reservas.nueva')}}" texto="Haz una reserva ahora"/>
+                    @endif
                 </li>
             </ul>
         </div>
