@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mesa;
 use App\Models\Reserva;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 
 class ReservaController extends Controller
@@ -145,6 +146,77 @@ class ReservaController extends Controller
         }
 
         return view('reservas.pendientes', compact('reservas'));
+    }
+
+
+    ////////////////////////////////////
+    /// API
+    ////////////////////////////////////
+
+    public function apiNewReserva(Request $request) {
+        $mesa_id = $request->input('mesa_id');
+        $fecha = $request->input('fecha');
+        $hora = $request->input('hora');
+        $numpersonas = $request->input('numpersonas');
+        $telefono = $request->input('telefono');
+        $user_id = $request->input('user_id');
+
+        //Comprobar disponibilidad de la mesa
+        $reservaOcupada = DB::table('reservas')->where('mesa_id', $mesa_id)
+            ->where('fecha', $fecha)
+            ->where('hora', $hora)
+            ->first();
+        if ($reservaOcupada) {
+            return response()->json([
+                "mensaje" => "Mesa ocupada o no disponible",
+                "error" => 1
+            ]);
+        }
+
+        //Mesa seleccionada es demasiado grande
+        $mesa = Mesa::findOrFail($mesa_id);
+        if ( ($mesa->capacidad < $numpersonas) || (($mesa->capacidad - $numpersonas) > 2) ) {
+            return response()->json([
+                "mensaje" => "Mesa de tamaño incompatible",
+                "error" => 2
+            ]);
+        }
+
+        //Crear reserva
+        $reserva = Reserva::create([ 'mesa_id' => $mesa_id,
+            'fecha' => $fecha,
+            'hora' => $hora,
+            'user_id' => $user_id,
+            'numpersonas' => $numpersonas,
+            'telefono' => $telefono,
+            'estado' => 'pendiente']);
+
+        return $reserva->toResource();
+
+    }
+
+
+    public function apiUpdateReserva($id) {
+        $reserva = Reserva::findOrFail($id);
+
+        //Verificar que la reserva pertenece al usuario logueado
+
+        $reserva->estado = 'cancelada';
+        $reserva->save();
+
+        return $reserva->toResource();
+    }
+
+    public function apiDeleteReserva($id) {
+        $reserva = Reserva::findOrFail($id);
+
+        //Comprobar que la reserva sea mía o del admin
+
+        $reserva->delete();
+        return response()->json([
+            "mensaje" => "Reserva eliminada",
+            "reserva" => $reserva->toResource()
+        ]);
     }
 
 
