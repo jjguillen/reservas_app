@@ -15,7 +15,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-//RUTA PARA GENERAR TOKENS
+//RUTA PARA GENERAR TOKENS (no protegida)
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
         'email' => ['required', 'email'],
@@ -27,8 +27,8 @@ Route::post('/login', function (Request $request) {
         abort(401);
     }
 
+    //Generar token
     $token = Auth::user()->createToken('my-app-token')->plainTextToken;
-
     return response()->json(['token' => $token, 'user' => Auth::user()]);
 });
 
