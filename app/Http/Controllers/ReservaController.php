@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\MesaResource;
 use App\Models\Mesa;
 use App\Models\Reserva;
 use Illuminate\Http\Request;
@@ -149,17 +150,26 @@ class ReservaController extends Controller
     }
 
 
-    ////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// API
-    ////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Crea una nueva reserva si hay disponibilidad ese día a esa hora
+     * Y comprobando que la mesa sea suficientemente grande pero no demasiado
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     *   Error: 1 -> Mesa ocupada
+     *   Error: 2 -> Mesa de tamaño incompatible
+     *   Reserva: Reserva creada y la devuelve
+     */
     public function apiNewReserva(Request $request) {
         $mesa_id = $request->input('mesa_id');
         $fecha = $request->input('fecha');
         $hora = $request->input('hora');
         $numpersonas = $request->input('numpersonas');
         $telefono = $request->input('telefono');
-        $user_id = $request->input('user_id');
+        $user_id = auth()->user()->id;
 
         //Comprobar disponibilidad de la mesa
         $reservaOcupada = DB::table('reservas')->where('mesa_id', $mesa_id)
@@ -195,11 +205,23 @@ class ReservaController extends Controller
 
     }
 
-
+    /**
+     * Cancelar una reserva
+     * Tienes que ser admin o la reserva debes haberla creado tú
+     * @param $id
+     * @return -> Reserva cancelada
+     *  Error: 403: si la reserva no pertenece al usuario logueado o eres admin
+     */
     public function apiUpdateReserva($id) {
         $reserva = Reserva::findOrFail($id);
 
-        //Verificar que la reserva pertenece al usuario logueado
+        //Si no eres admin o no es tuya la reserva no puedes cancelarla
+        if (!auth()->user()->admin) {
+            //Verificar que la reserva pertenece al usuario logueado
+            if ($reserva->user_id != auth()->user()->id) {
+                abort(403); //Forbidden
+            }
+        }
 
         $reserva->estado = 'cancelada';
         $reserva->save();
@@ -207,10 +229,23 @@ class ReservaController extends Controller
         return $reserva->toResource();
     }
 
+    /**
+     * Borrar una reserva
+     * Tienes que ser admin o la reserva debes haberla creado tú
+     * @param $id
+     * @return: reserva cancelada
+     *  Error: 403: si la reserva no pertenece al usuario logueado o eres admin
+     */
     public function apiDeleteReserva($id) {
         $reserva = Reserva::findOrFail($id);
 
-        //Comprobar que la reserva sea mía o del admin
+        //Si no eres admin o no es tuya la reserva no puedes borrarla
+        if (!auth()->user()->admin) {
+            //Verificar que la reserva pertenece al usuario logueado
+            if ($reserva->user_id != auth()->user()->id) {
+                abort(403); //Forbidden
+            }
+        }
 
         $reserva->delete();
         return response()->json([
@@ -218,6 +253,46 @@ class ReservaController extends Controller
             "reserva" => $reserva->toResource()
         ]);
     }
+
+    /**
+     * Devuelve todas las mesas disponibles
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
+    public function apiGetMesas() {
+        return MesaResource::collection(Mesa::all());
+    }
+
+    /**
+     * Devuelve una mesa por su ID
+     * @param $id
+     * @return mixed
+     */
+    public function apiGetMesaById($id) {
+        return Mesa::findOrFail($id)->toResource();
+    }
+
+    public function apiGetReservasAdmin() {
+        //Tienes que ser admin para mostrar todas las reservas
+        if (auth()->user()->admin)
+            return Reserva::all()->toResourceCollection();
+        else
+            abort(401);
+    }
+
+    public function apiGetReservas() {
+        return Reserva::where('user_id','=',auth()->id())->get()->toResourceCollection();
+    }
+
+    public function apiGetReservasById($id) {
+        $reserva = Reserva::findOrFail($id);
+        if ($reserva->user_id == auth()->id()) {
+            return $reserva->toResource();
+        } else {
+            abort(403); //Forbidden
+        }
+    }
+
+
 
 
 }

@@ -8,14 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-//TODAS LAS URLs VAN CON /api delante
+//TODAS LAS URLS VAN CON /api delante
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-
-//RUTA PARA GENERAR TOKENS (no protegida)
+//RUTA PARA GENERAR TOKENS (no protegida) ------------------------------------------------------------------------
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
         'email' => ['required', 'email'],
@@ -32,27 +27,30 @@ Route::post('/login', function (Request $request) {
     return response()->json(['token' => $token, 'user' => Auth::user()]);
 });
 
-//RUTAS PROTEGIDAS
+
+//RUTAS PROTEGIDAS ------------------------------------------------------------------------------------------------
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/mesas', function () {
-        return MesaResource::collection(Mesa::all());
-    });
+    //Muestras todas las mesas del restaurante
+    Route::get('/mesas', [ReservaController::class, 'apiGetMesas']);
 
-    Route::get('/mesas/{id}', function (string $id) {
-        return Mesa::findOrFail($id)->toResource();
-    });
+    //Muestra una sola mesa por id
+    Route::get('/mesas/{id}', [ReservaController::class, 'apiGetMesaById']);
 
-    Route::get('/reservas', function () {
-        return Reserva::all()->toResourceCollection();
-    });
+    //Si eres admin puedes ver todas las reservas
+    Route::get('/reservas/admin', [ReservaController::class, 'apiGetReservasAdmin']);
 
-    Route::get('/reservas/{id}', function (string $id) {
-        return Reserva::findOrFail($id)->toResource();
-    });
+    //Muestra tus reservas (token)
+    Route::get('/reservas', [ReservaController::class, 'apiGetReservas']);
 
+    //Muestra una sola reserva por id, si es tuya te deja verla, sino te bloquea
+    Route::get('/reservas/{id}', [ReservaController::class, 'apiGetReservasById']);
+
+    //Crea una nueva reserva validando disponibilidad y tamaño de mesa
     Route::post('/reservas', [ReservaController::class, 'apiNewReserva']);
 
+    //Modifica una reserva cancelandola sólo si es tuya o si eres admin
     Route::put('/reservas/{id}', [ReservaController::class, 'apiUpdateReserva']);
 
+    //Elimina una reserva sólo si es tuya o si eres admin
     Route::delete('/reservas/{id}', [ReservaController::class, 'apiDeleteReserva']);
 });
