@@ -23,15 +23,15 @@ jobs:
           cd /home/ubuntu/reservas_app &&
           git fetch origin main &&
           git reset --hard origin/main &&
-          composer update --no-dev --optimize-autoloader --no-interaction &&
+          /home/ubuntu/.config/herd-lite/bin/composer update --no-dev --optimize-autoloader --no-interaction &&
           npm run build &&
-          php artisan config:clear &&
-          php artisan cache:clear &&
-          php artisan route:clear &&
-          php artisan view:clear &&
-          php artisan config:cache &&
-          php artisan route:cache &&
-          php artisan view:cache &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan config:clear &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan cache:clear &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan route:clear &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan view:clear &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan config:cache &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan route:cache &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan view:cache &&
           podman start mariadb_lv &&
           sleep 10 &&
           php artisan serve --host=0.0.0.0 --port=8000 &&
