@@ -34,6 +34,6 @@ jobs:
           /home/ubuntu/.config/herd-lite/bin/php artisan view:cache &&
           podman start mariadb_lv &&
           sleep 10 &&
-          php artisan serve --host=0.0.0.0 --port=8000 &&
+          /home/ubuntu/.config/herd-lite/bin/php artisan serve --host=0.0.0.0 --port=8000 &&
           echo "Despliegue completado"
           
