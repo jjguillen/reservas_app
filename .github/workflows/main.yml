@@ -20,11 +20,11 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: >-
-          export PATH=$PATH:/usr/bin:/usr/local/bin:/home/ubuntu/.config/herd-lite/bin/ &&
+          export PATH=$PATH:/usr/bin:/usr/local/bin:/home/ubuntu/.config/herd-lite/bin/:/home/ubuntu/.nvm/versions/node/v24.11.1/bin &&
           cd /home/ubuntu/reservas_app &&
           git fetch origin main &&
           git reset --hard origin/main &&
-          composer update --no-dev --optimize-autoloader --no-interaction &&
+          composer install --no-dev --optimize-autoloader --no-interaction &&
           npm run build &&
           php artisan config:clear &&
           php artisan cache:clear &&
