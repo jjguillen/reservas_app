@@ -11,4 +11,40 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-      
+    - name: DeployEC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: >-
+          cd /home/ubuntu/reservas_app
+          
+          # Pull del repositorio
+          git fetch origin main
+          git reset --hard origin/main
+          
+          # Instalar dependencias de Composer
+          composer install --no-dev --optimize-autoloader --no-interaction
+          
+          # Limpiar y compilar cachés de Laravel
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan route:clear
+          php artisan view:clear
+          
+          # Optimizar para producción
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          
+          # Arrancar contenedor MariaDB con Podman
+          podman start mariadb_lv
+          
+          # Esperar a que arranque
+          sleep 10
+          
+          #Lanzar app
+          php artisan serve --host=0.0.0.0 --port=8000
+          
