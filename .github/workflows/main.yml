@@ -20,20 +20,21 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: >-
+          export PATH=$PATH:/usr/bin:/usr/local/bin:/home/ubuntu/.config/herd-lite/bin/ &&
           cd /home/ubuntu/reservas_app &&
           git fetch origin main &&
           git reset --hard origin/main &&
-          /home/ubuntu/.config/herd-lite/bin/composer update --no-dev --optimize-autoloader --no-interaction &&
+          composer update --no-dev --optimize-autoloader --no-interaction &&
           npm run build &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan config:clear &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan cache:clear &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan route:clear &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan view:clear &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan config:cache &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan route:cache &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan view:cache &&
+          php artisan config:clear &&
+          php artisan cache:clear &&
+          php artisan route:clear &&
+          php artisan view:clear &&
+          php artisan config:cache &&
+          php artisan route:cache &&
+          php artisan view:cache &&
           podman start mariadb_lv &&
           sleep 10 &&
-          /home/ubuntu/.config/herd-lite/bin/php artisan serve --host=0.0.0.0 --port=8000 &&
+          php artisan serve --host=0.0.0.0 --port=8000 &&
           echo "Despliegue completado"
           
