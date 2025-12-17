@@ -19,33 +19,21 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
-        script: |
-          cd /home/ubuntu/reservas_app
-          
-          # Pull del repositorio
-          git fetch origin main
-          git reset --hard origin/main
-          
-          # Instalar dependencias de Composer
-          composer install --no-dev --optimize-autoloader --no-interaction
-          
-          # Limpiar y compilar cachés de Laravel
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan route:clear
-          php artisan view:clear
-          
-          # Optimizar para producción
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-          
-          # Arrancar contenedor MariaDB con Podman
-          podman start mariadb_lv
-          
-          # Esperar a que arranque
-          sleep 10
-          
-          #Lanzar app
-          php artisan serve --host=0.0.0.0 --port=8000
+        script: >-
+          cd /home/ubuntu/reservas_app &&
+          git fetch origin main &&
+          git reset --hard origin/main &&
+          composer update --no-dev --optimize-autoloader --no-interaction &&
+          npm run build &&
+          php artisan config:clear &&
+          php artisan cache:clear &&
+          php artisan route:clear &&
+          php artisan view:clear &&
+          php artisan config:cache &&
+          php artisan route:cache &&
+          php artisan view:cache &&
+          podman start mariadb_lv &&
+          sleep 10 &&
+          php artisan serve --host=0.0.0.0 --port=8000 &&
+          echo "Despliegue completado"
           
