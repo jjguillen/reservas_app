@@ -36,7 +36,7 @@
                 @endforeach
             </ul>
 
-            <x-button_w link="{{route('reservas.nueva')}}" texto="Haz una reserva ahora"/>
+            <x-button_w link="{{route('reservas.nueva')}}" texto="Haz una reserva"/>
 
         </div>
     </main>
